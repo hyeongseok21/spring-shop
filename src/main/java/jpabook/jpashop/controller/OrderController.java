@@ -1,5 +1,6 @@
 package jpabook.jpashop.controller;
 
+import jakarta.validation.Valid;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.item.Item;
@@ -10,6 +11,7 @@ import jpabook.jpashop.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,9 +35,13 @@ public class OrderController {
     }
 
     @PostMapping("/order")
-    public String order(@RequestParam("memberId") Long memberId,
-                        @RequestParam("itemId") Long itemId,
-                        @RequestParam("count") int count) {
+    public String order(@Valid @RequestParam("memberId") Long memberId,
+                        @Valid @RequestParam("itemId") Long itemId,
+                        @Valid @RequestParam("count") int count, BindingResult result) {
+
+        if(result.hasErrors()) {
+            return "order/orderForm";
+        }
 
         // multi 상품을 주문할 수 있게 바꾸기
         orderService.order(memberId, itemId, count);

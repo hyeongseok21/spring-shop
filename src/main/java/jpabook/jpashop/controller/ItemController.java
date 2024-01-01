@@ -1,11 +1,13 @@
 package jpabook.jpashop.controller;
 
+import jakarta.validation.Valid;
 import jpabook.jpashop.domain.item.Book;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +28,11 @@ public class ItemController {
     }
 
     @PostMapping("/items/new")
-    public String create(BookForm form) {
+    public String create(BookForm form, BindingResult result) {
+
+        if(result.hasErrors()) {
+            return "items/createItemForm";
+        }
 
         // createBook()으로 setter를 제거하는게 더 나은 설계.
         Book book = new Book();
