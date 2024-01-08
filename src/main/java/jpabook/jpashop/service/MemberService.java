@@ -44,4 +44,19 @@ public class MemberService {
     public Member findOne(Long memberId) {
         return memberRepository.findOne(memberId);
     }
+
+    @Transactional
+    public void update(Long id, String name) {
+        Member member = memberRepository.findOne(id);
+        member.setName(name);
+    }
+
+    // 바로 Member를 반환 - 영속상태가 끊기는 member가 반환되므로 써도 됨
+    // 그러나 Command와 Query를 철저하게 분리한다는 정책에 위배
+    // update는 entity를 바꾸는 변경성 메서드이나, id를 가지고 조회하는 꼴이 되어버림
+//    public Member update(Long id, String name) {
+//        Member member = memberRepository.findOne(id);
+//        member.setName(name);
+//        return member
+//    }
 }
