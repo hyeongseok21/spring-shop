@@ -1,10 +1,12 @@
 package jpabook.jpashop.api;
 
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryDto;
 import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class OrderSimpleApiController {
 
     private final OrderRepository orderRepository;
+    private final OrderSimpleQueryRepository orderSimpleQueryRepository;
 
     // 결과: 쿼리가 1 + 6 = 7번 나감
     @GetMapping("/api/v1/simple-orders")
@@ -53,7 +56,8 @@ public class OrderSimpleApiController {
         return result;
     }
 
-    // fetch-join 적용. Lazy인 entity를
+    // fetch-join 적용. Lazy인 entity
+    // api 범용성 추가(재사용성) 코드 깔끔, 성능은 살짝 덜 최적화, Entity를 직접 조회하므로 수정 불가
     @GetMapping("/api/v3/simple-orders")
     public List<SimpleOrderDto> ordersV3() {
         List<Order> orders = orderRepository.findAllWithMemberDelivery();
@@ -63,6 +67,12 @@ public class OrderSimpleApiController {
                 .collect(Collectors.toList());
 
         return result;
+    }
+
+    // api 범용성 없음. 코드 약간 지저분, 성능 최적화, Entity가 아닌 Dto로 조회하므로 수정 가능
+    @GetMapping("/api/v4/simple-orders")
+    public List<OrderSimpleQueryDto> ordersV4() {
+        return orderSimpleQueryRepository.findOrderDtos();
     }
 
     @Data
@@ -75,11 +85,10 @@ public class OrderSimpleApiController {
 
         public SimpleOrderDto(Order order) {
             orderId = order.getId();
-            name = order.getMember().getName(); // LAZY 초기화
+            name = order.getMember().getName();
             orderDate = order.getOrderDate();
             orderStatus = order.getStatus();
-            address = order.getDelivery().getAddress(); // LAZY 초기화
+            address = order.getDelivery().getAddress();
         }
     }
-
 }
